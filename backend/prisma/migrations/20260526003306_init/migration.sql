@@ -21,3 +21,5 @@ CREATE UNIQUE INDEX "Client_email_key" ON "Client"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Favorite_clientId_productId_key" ON "Favorite"("clientId", "productId");
+
+
