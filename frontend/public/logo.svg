@@ -1,0 +1,16 @@
+<svg viewBox="0 0 100 100" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main bookmark/W shape in orange -->
+  <g>
+    <!-- Left vertical line -->
+    <path d="M 25 15 L 20 70 L 35 55 L 35 15 Z" fill="#F97316" stroke="#F97316" stroke-width="2" stroke-linejoin="round"/>
+    
+    <!-- Right vertical line -->
+    <path d="M 65 15 L 65 55 L 80 70 L 75 15 Z" fill="#F97316" stroke="#F97316" stroke-width="2" stroke-linejoin="round"/>
+    
+    <!-- Top connection -->
+    <rect x="25" y="15" width="40" height="6" fill="#F97316" rx="2"/>
+    
+    <!-- Circle accent (top right) -->
+    <circle cx="75" cy="18" r="7" fill="#F97316"/>
+  </g>
+</svg>
