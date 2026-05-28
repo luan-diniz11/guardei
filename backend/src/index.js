@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 
+const authRouter = require('./routes/auth');
 const clientsRouter = require('./routes/clients');
 const favoritesRouter = require('./routes/favorites');
 const productsRouter = require('./routes/products');
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas
+app.use('/auth', authRouter);
 app.use('/clients', clientsRouter);
 app.use('/clients', favoritesRouter);
 app.use('/products', productsRouter);

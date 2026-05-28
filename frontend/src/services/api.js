@@ -9,7 +9,26 @@ const api = axios.create({
   }
 })
 
-// Clientes
+// ===== AUTENTICAÇÃO =====
+export const loginClient = async (credentials) => {
+  try {
+    const response = await api.post('/auth/login', credentials)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Erro ao fazer login: ' + error.message)
+  }
+}
+
+export const registerClient = async (clientData) => {
+  try {
+    const response = await api.post('/auth/register', clientData)
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Erro ao registrar: ' + error.message)
+  }
+}
+
+// ===== CLIENTES =====
 export const getClients = async () => {
   try {
     const response = await api.get('/clients')
@@ -45,7 +64,7 @@ export const deleteClient = async (id) => {
   }
 }
 
-// Produtos
+// ===== PRODUTOS =====
 export const getProducts = async () => {
   try {
     const response = await api.get('/products')
@@ -64,7 +83,7 @@ export const getProductById = async (id) => {
   }
 }
 
-// Favoritos
+// ===== FAVORITOS =====
 export const getFavorites = async (clientId) => {
   try {
     const response = await api.get(`/clients/${clientId}/favorites`)
