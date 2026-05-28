@@ -40,6 +40,7 @@ export default function Signup() {
       localStorage.setItem('clientId', response.id)
       navigate('/clients')
     } catch (err) {
+      console.error('Erro ao registrar:', err)
       setError(err.message || 'Erro ao criar conta')
     } finally {
       setLoading(false)

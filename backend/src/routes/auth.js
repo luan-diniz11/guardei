@@ -47,6 +47,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Nome, email e senha são obrigatórios' });
     }
 
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Email inválido' });
+    }
+
     // Verificar se email já existe
     const existingClient = await prisma.client.findUnique({
       where: { email }
@@ -65,13 +71,24 @@ router.post('/register', async (req, res) => {
       }
     });
 
+    console.log('✓ Cliente registrado:', newClient.email);
+
     // Retornar dados do cliente (sem a senha)
     const { password: _, ...clientData } = newClient;
     res.status(201).json(clientData);
 
   } catch (error) {
-    console.error('Erro ao registrar:', error);
-    res.status(500).json({ message: 'Erro ao registrar cliente' });
+    console.error('Erro ao registrar cliente:', error.message);
+    
+    // Tratamento específico de erros do Prisma
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: 'Email já cadastrado' });
+    }
+    
+    res.status(500).json({ 
+      message: 'Erro ao registrar cliente',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
