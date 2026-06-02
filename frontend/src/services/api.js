@@ -9,6 +9,19 @@ const api = axios.create({
   }
 })
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+const getClientId = () => {
+  const clientId = localStorage.getItem('clientId')
+  if (!clientId) {
+    throw new Error('Cliente não autenticado')
+  }
+  return clientId
+}
+
 // ===== AUTENTICAÇÃO =====
 export const loginClient = async (credentials) => {
   try {
@@ -31,7 +44,7 @@ export const registerClient = async (clientData) => {
 // ===== CLIENTES =====
 export const getClients = async () => {
   try {
-    const response = await api.get('/clients')
+    const response = await api.get('/clients', { headers: getAuthHeaders() })
     return response.data
   } catch (error) {
     throw new Error('Erro ao buscar clientes: ' + error.message)
@@ -40,7 +53,7 @@ export const getClients = async () => {
 
 export const createClient = async (clientData) => {
   try {
-    const response = await api.post('/clients', clientData)
+    const response = await api.post('/clients', clientData, { headers: getAuthHeaders() })
     return response.data
   } catch (error) {
     throw new Error('Erro ao criar cliente: ' + error.message)
@@ -49,7 +62,7 @@ export const createClient = async (clientData) => {
 
 export const updateClient = async (id, clientData) => {
   try {
-    const response = await api.put(`/clients/${id}`, clientData)
+    const response = await api.put(`/clients/${id}`, clientData, { headers: getAuthHeaders() })
     return response.data
   } catch (error) {
     throw new Error('Erro ao atualizar cliente: ' + error.message)
@@ -58,7 +71,7 @@ export const updateClient = async (id, clientData) => {
 
 export const deleteClient = async (id) => {
   try {
-    await api.delete(`/clients/${id}`)
+    await api.delete(`/clients/${id}`, { headers: getAuthHeaders() })
   } catch (error) {
     throw new Error('Erro ao deletar cliente: ' + error.message)
   }
@@ -67,7 +80,7 @@ export const deleteClient = async (id) => {
 // ===== PRODUTOS =====
 export const getProducts = async () => {
   try {
-    const response = await api.get('/products')
+    const response = await api.get('/products', { headers: getAuthHeaders() })
     return response.data
   } catch (error) {
     throw new Error('Erro ao buscar produtos: ' + error.message)
@@ -76,7 +89,7 @@ export const getProducts = async () => {
 
 export const getProductById = async (id) => {
   try {
-    const response = await api.get(`/products/${id}`)
+    const response = await api.get(`/products/${id}`, { headers: getAuthHeaders() })
     return response.data
   } catch (error) {
     throw new Error('Erro ao buscar produto: ' + error.message)
@@ -84,27 +97,36 @@ export const getProductById = async (id) => {
 }
 
 // ===== FAVORITOS =====
-export const getFavorites = async (clientId) => {
+export const getFavorites = async () => {
   try {
-    const response = await api.get(`/clients/${clientId}/favorites`)
+    const clientId = getClientId()
+    const response = await api.get(`/clients/${clientId}/favorites`, { headers: getAuthHeaders() })
     return response.data
   } catch (error) {
     throw new Error('Erro ao buscar favoritos: ' + error.message)
   }
 }
 
-export const addFavorite = async (clientId, productId) => {
+export const addFavorite = async (productId) => {
   try {
-    const response = await api.post(`/clients/${clientId}/favorites`, { productId })
+    const clientId = getClientId()
+    const response = await api.post(
+      `/clients/${clientId}/favorites`,
+      { productId },
+      { headers: getAuthHeaders() }
+    )
     return response.data
   } catch (error) {
     throw new Error('Erro ao adicionar favorito: ' + error.message)
   }
 }
 
-export const removeFavorite = async (clientId, productId) => {
+export const removeFavorite = async (favoriteId) => {
   try {
-    await api.delete(`/clients/${clientId}/favorites/${productId}`)
+    const clientId = getClientId()
+    await api.delete(`/clients/${clientId}/favorites/${favoriteId}`, {
+      headers: getAuthHeaders()
+    })
   } catch (error) {
     throw new Error('Erro ao remover favorito: ' + error.message)
   }

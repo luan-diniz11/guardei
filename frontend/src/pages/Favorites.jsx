@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { getFavorites, removeFavorite, getClients } from '../services/api'
+import { useNavigate } from 'react-router-dom'
+import { getFavorites, removeFavorite } from '../services/api'
 import FavoriteCard from '../components/FavoriteCard'
 
 export default function Favorites() {
-  const { id } = useParams()
   const navigate = useNavigate()
   const [favorites, setFavorites] = useState([])
   const [clientName, setClientName] = useState('')
@@ -12,20 +11,15 @@ export default function Favorites() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    const client = JSON.parse(localStorage.getItem('client') || '{}')
+    setClientName(client.name || '')
     fetchFavorites()
-  }, [id])
+  }, [])
 
   const fetchFavorites = async () => {
     setLoading(true)
     try {
-      const [favoritesData, clientsData] = await Promise.all([
-        getFavorites(id),
-        getClients()
-      ])
-
-      const client = clientsData.find((c) => c.id === parseInt(id))
-      setClientName(client?.name || '')
-
+      const favoritesData = await getFavorites()
       setFavorites(Array.isArray(favoritesData) ? favoritesData : [])
       setError('')
     } catch (err) {
@@ -35,9 +29,9 @@ export default function Favorites() {
     }
   }
 
-  const handleRemove = async (productId) => {
+  const handleRemove = async (favoriteId) => {
     try {
-      await removeFavorite(id, productId)
+      await removeFavorite(favoriteId)
       fetchFavorites()
     } catch (err) {
       setError(err.message)
@@ -54,10 +48,10 @@ export default function Favorites() {
             </h1>
           </div>
           <button
-            onClick={() => navigate('/clients')}
+            onClick={() => navigate('/products')}
             className="px-6 py-2 bg-gray-400 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-500 dark:hover:bg-gray-700 transition duration-300 font-semibold"
           >
-            ← Voltar para Clientes
+            ← Voltar para Produtos
           </button>
         </div>
 
@@ -77,14 +71,14 @@ export default function Favorites() {
         ) : favorites.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 text-lg">
-              Este cliente não tem favoritos ainda
+              Você ainda não tem favoritos
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {favorites.map((product) => (
               <FavoriteCard
-                key={product.id}
+                key={product.favoriteId}
                 product={product}
                 onRemove={handleRemove}
               />

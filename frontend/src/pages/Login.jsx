@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { loginClient } from '../services/api'
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -22,10 +22,12 @@ export default function Login() {
 
     try {
       const response = await loginClient({ email, password })
-      // Salvar token/dados no localStorage
-      localStorage.setItem('client', JSON.stringify(response))
-      localStorage.setItem('clientId', response.id)
-      navigate('/clients')
+      // Salvar token e dados do cliente no localStorage
+      localStorage.setItem('token', response.token)
+      localStorage.setItem('client', JSON.stringify(response.client))
+      localStorage.setItem('clientId', response.client.id)
+      onLogin?.()
+      navigate('/products')
     } catch (err) {
       setError(err.message || 'Email ou senha incorretos')
     } finally {

@@ -24,7 +24,7 @@ export default function FavoriteCard({ product, onRemove }) {
           </div>
         </div>
         <button
-          onClick={() => onRemove(product.id)}
+          onClick={() => onRemove(product.favoriteId)}
           className="w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300 font-semibold"
         >
           ✕ Remover dos Favoritos

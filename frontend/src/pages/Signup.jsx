@@ -35,10 +35,8 @@ export default function Signup() {
     }
 
     try {
-      const response = await registerClient({ name, email, password })
-      localStorage.setItem('client', JSON.stringify(response))
-      localStorage.setItem('clientId', response.id)
-      navigate('/clients')
+      await registerClient({ name, email, password })
+      navigate('/login')
     } catch (err) {
       console.error('Erro ao registrar:', err)
       setError(err.message || 'Erro ao criar conta')

@@ -1,8 +1,11 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const prisma = new PrismaClient();
+const jwtSecret = process.env.JWT_SECRET || 'change_this_secret_for_production';
 
 // POST /auth/login - Fazer login
 router.post('/login', async (req, res) => {
@@ -22,15 +25,21 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Email ou senha incorretos' });
     }
 
-    // Verificar senha (sem hash por enquanto, apenas comparação simples)
-    // TODO: Implementar bcrypt para hash de senhas
-    if (client.password !== password) {
+    // Verificar senha com hash
+    const passwordMatches = await bcrypt.compare(password, client.password);
+    if (!passwordMatches) {
       return res.status(401).json({ message: 'Email ou senha incorretos' });
     }
 
+    const token = jwt.sign(
+      { userId: client.id, email: client.email },
+      jwtSecret,
+      { expiresIn: '7d' }
+    );
+
     // Retornar dados do cliente (sem a senha)
     const { password: _, ...clientData } = client;
-    res.json(clientData);
+    res.json({ token, client: clientData });
 
   } catch (error) {
     console.error('Erro ao fazer login:', error);
@@ -62,12 +71,13 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ message: 'Email já cadastrado' });
     }
 
-    // Criar novo cliente
+    // Criar novo cliente com senha hash
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newClient = await prisma.client.create({
       data: {
         name,
         email,
-        password // TODO: Hash da senha com bcrypt
+        password: hashedPassword
       }
     });
 

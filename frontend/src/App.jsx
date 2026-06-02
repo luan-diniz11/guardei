@@ -24,17 +24,20 @@ export default function App() {
     </div>
   }
 
+  const handleLogin = () => setIsLoggedIn(true)
+
   return (
     <Router>
       <div className="flex flex-col min-h-screen dark">
         {isLoggedIn && <Navbar onLogout={() => setIsLoggedIn(false)} />}
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={isLoggedIn ? <Navigate to="/clients" replace /> : <Login />} />
-            <Route path="/login" element={isLoggedIn ? <Navigate to="/clients" replace /> : <Login />} />
-            <Route path="/signup" element={isLoggedIn ? <Navigate to="/clients" replace /> : <Signup />} />
+            <Route path="/" element={isLoggedIn ? <Navigate to="/products" replace /> : <Login onLogin={handleLogin} />} />
+            <Route path="/login" element={isLoggedIn ? <Navigate to="/products" replace /> : <Login onLogin={handleLogin} />} />
+            <Route path="/signup" element={isLoggedIn ? <Navigate to="/products" replace /> : <Signup />} />
             <Route path="/clients" element={isLoggedIn ? <Clients /> : <Navigate to="/login" replace />} />
             <Route path="/products" element={isLoggedIn ? <Products /> : <Navigate to="/login" replace />} />
+            <Route path="/favorites" element={isLoggedIn ? <Favorites /> : <Navigate to="/login" replace />} />
             <Route path="/clients/:id/favorites" element={isLoggedIn ? <Favorites /> : <Navigate to="/login" replace />} />
           </Routes>
         </main>

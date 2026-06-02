@@ -40,7 +40,7 @@ export default function ClientCard({ client, onEdit, onDelete, onViewFavorites }
         </div>
       </div>
       <Link
-        to={`/clients/${client.id}/favorites`}
+        to="/favorites"
         className="inline-block mt-4 px-4 py-2 bg-orange-default text-white rounded-md hover:bg-orange-500 transition duration-300"
       >
         Ver Favoritos

@@ -20,11 +20,11 @@ export default function Navbar({ onLogout }) {
             <span className="text-xl font-bold text-orange-500">🛍️ Guardei</span>
           </Link>
           <div className="flex space-x-6 items-center">
-            <Link to="/clients" className="hover:text-orange-500 transition duration-300">
-              Clientes
-            </Link>
             <Link to="/products" className="hover:text-orange-500 transition duration-300">
               Produtos
+            </Link>
+            <Link to="/favorites" className="hover:text-orange-500 transition duration-300">
+              Favoritos
             </Link>
             <div className="border-l border-gray-700 pl-6 flex items-center space-x-4">
               <span className="text-sm text-gray-400">{client.email}</span>

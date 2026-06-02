@@ -1,28 +1,35 @@
 const express = require('express');
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
+const authenticateToken = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 const FAKE_STORE_API = 'https://fakestoreapi.com';
 
+router.use(authenticateToken);
+
 // GET /clients/:clientId/favorites - listar favoritos com dados da API
 router.get('/:clientId/favorites', async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.id;
 
-    // Verificar se cliente existe
-    const client = await prisma.client.findUnique({
-      where: { id: parseInt(clientId) }
+    if (req.params.clientId && parseInt(req.params.clientId) !== clientId) {
+      return res.status(403).json({ error: 'Operação não permitida para este cliente' });
+    }
+
+    // Verificar se cliente autenticado existe
+    const authenticatedClient = await prisma.client.findUnique({
+      where: { id: clientId }
     });
 
-    if (!client) {
+    if (!authenticatedClient) {
       return res.status(404).json({ error: 'Cliente não encontrado' });
     }
 
-    // Buscar favoritos
+    // Buscar favoritos do cliente autenticado
     const favorites = await prisma.favorite.findMany({
-      where: { clientId: parseInt(clientId) }
+      where: { clientId }
     });
 
     // Buscar dados de cada produto na API externa
@@ -60,19 +67,23 @@ router.get('/:clientId/favorites', async (req, res) => {
 // POST /clients/:clientId/favorites - adicionar favorito
 router.post('/:clientId/favorites', async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.id;
     const { productId } = req.body;
 
     if (!productId) {
       return res.status(400).json({ error: 'productId é obrigatório' });
     }
 
-    // Verificar se cliente existe
-    const client = await prisma.client.findUnique({
-      where: { id: parseInt(clientId) }
+    if (req.params.clientId && parseInt(req.params.clientId) !== clientId) {
+      return res.status(403).json({ error: 'Operação não permitida para este cliente' });
+    }
+
+    // Verificar se cliente autenticado existe
+    const authenticatedClient = await prisma.client.findUnique({
+      where: { id: clientId }
     });
 
-    if (!client) {
+    if (!authenticatedClient) {
       return res.status(404).json({ error: 'Cliente não encontrado' });
     }
 
@@ -87,7 +98,7 @@ router.post('/:clientId/favorites', async (req, res) => {
     const existingFavorite = await prisma.favorite.findUnique({
       where: {
         clientId_productId: {
-          clientId: parseInt(clientId),
+          clientId,
           productId: parseInt(productId)
         }
       }
@@ -101,7 +112,7 @@ router.post('/:clientId/favorites', async (req, res) => {
     const favorite = await prisma.favorite.create({
       data: {
         productId: parseInt(productId),
-        clientId: parseInt(clientId)
+        clientId
       }
     });
 
@@ -115,29 +126,34 @@ router.post('/:clientId/favorites', async (req, res) => {
 // DELETE /clients/:clientId/favorites/:favoriteId - remover favorito
 router.delete('/:clientId/favorites/:favoriteId', async (req, res) => {
   try {
-    const { clientId, favoriteId } = req.params;
+    const clientId = req.user.id;
+    const favoriteId = parseInt(req.params.favoriteId);
 
-    // Verificar se cliente existe
-    const client = await prisma.client.findUnique({
-      where: { id: parseInt(clientId) }
+    if (req.params.clientId && parseInt(req.params.clientId) !== clientId) {
+      return res.status(403).json({ error: 'Operação não permitida para este cliente' });
+    }
+
+    // Verificar se cliente autenticado existe
+    const authenticatedClient = await prisma.client.findUnique({
+      where: { id: clientId }
     });
 
-    if (!client) {
+    if (!authenticatedClient) {
       return res.status(404).json({ error: 'Cliente não encontrado' });
     }
 
     // Verificar se favorito existe e pertence ao cliente
     const favorite = await prisma.favorite.findUnique({
-      where: { id: parseInt(favoriteId) }
+      where: { id: favoriteId }
     });
 
-    if (!favorite || favorite.clientId !== parseInt(clientId)) {
+    if (!favorite || favorite.clientId !== clientId) {
       return res.status(404).json({ error: 'Favorito não encontrado' });
     }
 
     // Remover favorito
     await prisma.favorite.delete({
-      where: { id: parseInt(favoriteId) }
+      where: { id: favoriteId }
     });
 
     res.json({ message: 'Favorito removido com sucesso' });
